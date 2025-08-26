@@ -3,10 +3,13 @@ package ddg.walking_rabbit.global.domain.repository;
 import ddg.walking_rabbit.global.domain.entity.ChatRecordEntity;
 import ddg.walking_rabbit.global.domain.entity.ConversationEntity;
 import ddg.walking_rabbit.global.domain.entity.UserEntity;
+import ddg.walking_rabbit.rank.dto.RankDto;
+import ddg.walking_rabbit.rank.dto.UserChatRecordRankDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.parser.Entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,4 +32,8 @@ public interface ChatRecordRepository extends JpaRepository<ChatRecordEntity, Lo
 
     @Query("select c from ChatRecordEntity c where c.user = :user and c.createdAt >= :start and c.createdAt < :end order by c.chatRecordId asc")
     List<ChatRecordEntity> findAllByUserAndBetweenDateOrderByChatRecordIdAsc(UserEntity user, LocalDateTime start, LocalDateTime end);
+
+    Integer findCountByUser(UserEntity user);
+
+
 }
