@@ -14,4 +14,6 @@ public interface ConversationRepository extends JpaRepository<ConversationEntity
     List<ConversationEntity> findAllByUser(UserEntity user);
 
     Integer countByUserAndTitle(UserEntity user, String title);
+
+    ConversationEntity findTopByUserAndTitleOrderByConversationIdDesc(UserEntity user, String title);
 }

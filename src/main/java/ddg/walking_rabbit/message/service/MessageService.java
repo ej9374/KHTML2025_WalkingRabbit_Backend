@@ -1,5 +1,6 @@
 package ddg.walking_rabbit.message.service;
 
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.cloud.storage.*;
 import ddg.walking_rabbit.global.domain.entity.*;
 import ddg.walking_rabbit.message.dto.*;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -63,9 +65,19 @@ public class MessageService {
 
         // 챗봇 모델 요청
         Integer num = conversationRepository.countByUserAndTitle(user, title);
+
+        List<String> messages = null;
+
+        if (num != 0) {
+            ConversationEntity conv = conversationRepository.findTopByUserAndTitleOrderByConversationIdDesc(user, title);
+            messages = messageRepository.findAllContentByConversationOrderByMessageIdAsc(conv);
+        }
+
         ChatModelRequestDto requestDto = new ChatModelRequestDto();
         requestDto.setTitle(title);
         requestDto.setRecordNum(num);
+        requestDto.setMessages(messages);
+        requestDto.setPhoto(userMessage.getContent());
         requestDto.setMission(mission != null ? mission.getContent() : null);
 
         ChatModelResponseDto responseDto = sendInfoToModel(requestDto);
@@ -201,7 +213,7 @@ public class MessageService {
     public String sendPhotoToModel(String content){
         return webClient.post()
                 .uri("/api/name")
-                .bodyValue(content)
+                .bodyValue(TextNode.valueOf(content))
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is5xxServerError,
