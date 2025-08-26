@@ -90,6 +90,11 @@ public class MessageService {
             }
         }
 
+        if (mission != null){
+            mission.setIsSuccess(MissionStatus.SUCCESS);
+            missionRepository.save(mission);
+        }
+
         MessageEntity aiMessage = new MessageEntity();
         aiMessage.setContent(responseDto.getAnswer());
         aiMessage.setConversation(conversation);
