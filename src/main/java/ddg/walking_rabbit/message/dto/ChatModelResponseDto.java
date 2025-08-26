@@ -5,9 +5,8 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class ModelResponseDto {
+public class ChatModelResponseDto {
     private String answer;
-    private String title;
     private List<String> keyword;
     private Boolean isSuccess;
 }

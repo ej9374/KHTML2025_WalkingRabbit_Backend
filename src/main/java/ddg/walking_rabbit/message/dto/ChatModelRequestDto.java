@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ModelRequestDto {
-    private String photo;
+public class ChatModelRequestDto {
+    private String title;
+    private Integer recordNum;
     private String mission;
 }

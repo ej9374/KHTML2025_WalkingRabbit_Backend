@@ -2,7 +2,6 @@ package ddg.walking_rabbit.message.service;
 
 import com.google.cloud.storage.*;
 import ddg.walking_rabbit.global.domain.entity.*;
-import ddg.walking_rabbit.message.config.WebClientConfig;
 import ddg.walking_rabbit.message.dto.*;
 import ddg.walking_rabbit.global.domain.repository.ConversationRepository;
 import ddg.walking_rabbit.global.domain.repository.MessageRepository;
@@ -12,12 +11,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -25,7 +21,6 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,24 +51,27 @@ public class MessageService {
 
         MessageEntity userMessage = uploadImage(file, conversation);
 
-        // 모델 요청 바디
-        ModelRequestDto requestDto = new ModelRequestDto();
-        requestDto.setPhoto(userMessage.getContent());
+        // 사진인식 모델 요청
+        String title = sendPhotoToModel(userMessage.getContent());
+
+        if (title == null) {
+            throw new RuntimeException("응답이 옳지 않습니다.");
+        }
+        if (title.equals("NULL")){
+            throw new EntityNotFoundException("해당 사진은 꽃이 아닙니다.");
+        }
+
+        // 챗봇 모델 요청
+        Integer num = conversationRepository.countByUserAndTitle(user, title);
+        ChatModelRequestDto requestDto = new ChatModelRequestDto();
+        requestDto.setTitle(title);
+        requestDto.setRecordNum(num);
         requestDto.setMission(mission != null ? mission.getContent() : null);
 
-        ModelResponseDto responseDto = webClient.post()
-                .uri("/api/photo")
-                .bodyValue(requestDto)
-                .retrieve()
-                .onStatus(
-                        HttpStatusCode::is5xxServerError,
-                        resp -> resp.createException().flatMap(Mono::error)
-                )
-                .bodyToMono(ModelResponseDto.class)
-                .block();
+        ChatModelResponseDto responseDto = sendInfoToModel(requestDto);
 
         if (responseDto == null) {
-            throw new IllegalArgumentException("응답이 옳지 않습니다");
+            throw new RuntimeException("응답이 옳지 않습니다.");
         }
 
          // 미션인경우
@@ -92,6 +90,11 @@ public class MessageService {
             }
         }
 
+        if (mission != null){
+            mission.setIsSuccess(MissionStatus.SUCCESS);
+            missionRepository.save(mission);
+        }
+
         MessageEntity aiMessage = new MessageEntity();
         aiMessage.setContent(responseDto.getAnswer());
         aiMessage.setConversation(conversation);
@@ -99,7 +102,6 @@ public class MessageService {
         aiMessage.setContentType(ContentType.TEXT);
         messageRepository.save(aiMessage);
 
-        String title = responseDto.getTitle();
         conversation.setTitle(title);
         conversationRepository.save(conversation);
 
@@ -111,39 +113,6 @@ public class MessageService {
         result.setContent(aiMessage.getContent());
         result.setKeyword(responseDto.getKeyword());
         return result;
-    }
-
-    @Transactional
-    public MessageEntity uploadImage(MultipartFile file, ConversationEntity conversation) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("빈 파일입니다.");
-        }
-
-        String newFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        BlobId blobId = BlobId.of(bucketName, newFilename);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
-                .setContentType(file.getContentType())
-                .build();
-
-        try {
-            Blob blob = storage.create(blobInfo, file.getBytes());
-            if (blob == null || blob.getSize() == 0) {
-                throw new IllegalArgumentException("GCS 업로드 중 오류가 발생했습니다.");
-            }
-        } catch(IOException | StorageException e){
-            throw new IllegalArgumentException("GCS 업로드 중 오류가 발생했습니다.");
-        }
-
-        String publicUrl = String.format("https://storage.googleapis.com/%s/%s",
-                bucketName, URLEncoder.encode(newFilename, StandardCharsets.UTF_8));
-
-        MessageEntity message = new MessageEntity();
-        message.setRole(Role.USER);
-        message.setContentType(ContentType.PHOTO);
-        message.setContent(publicUrl);
-        message.setConversation(conversation);
-        messageRepository.save(message);
-        return message;
     }
 
     @Transactional
@@ -195,4 +164,64 @@ public class MessageService {
 
         return result;
     }
+
+    @Transactional
+    public MessageEntity uploadImage(MultipartFile file, ConversationEntity conversation) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("빈 파일입니다.");
+        }
+
+        String newFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        BlobId blobId = BlobId.of(bucketName, newFilename);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                .setContentType(file.getContentType())
+                .build();
+
+        try {
+            Blob blob = storage.create(blobInfo, file.getBytes());
+            if (blob == null || blob.getSize() == 0) {
+                throw new IllegalArgumentException("GCS 업로드 중 오류가 발생했습니다.");
+            }
+        } catch(IOException | StorageException e){
+            throw new IllegalArgumentException("GCS 업로드 중 오류가 발생했습니다.");
+        }
+
+        String publicUrl = String.format("https://storage.googleapis.com/%s/%s",
+                bucketName, URLEncoder.encode(newFilename, StandardCharsets.UTF_8));
+
+        MessageEntity message = new MessageEntity();
+        message.setRole(Role.USER);
+        message.setContentType(ContentType.PHOTO);
+        message.setContent(publicUrl);
+        message.setConversation(conversation);
+        messageRepository.save(message);
+        return message;
+    }
+
+    public String sendPhotoToModel(String content){
+        return webClient.post()
+                .uri("/api/name")
+                .bodyValue(content)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        resp -> resp.createException().flatMap(Mono::error)
+                )
+                .bodyToMono(String.class)
+                .block();
+    }
+
+    public ChatModelResponseDto sendInfoToModel(ChatModelRequestDto requestDto) {
+        return webClient.post()
+                .uri("/api/photo")
+                .bodyValue(requestDto)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        resp -> resp.createException().flatMap(Mono::error)
+                )
+                .bodyToMono(ChatModelResponseDto.class)
+                .block();
+    }
+
 }
