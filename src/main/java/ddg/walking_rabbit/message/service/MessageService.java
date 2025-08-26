@@ -61,6 +61,9 @@ public class MessageService {
             throw new EntityNotFoundException("해당 사진은 꽃이 아닙니다.");
         }
 
+        conversation.setTitle(title);
+        conversationRepository.save(conversation);
+
         // 챗봇 모델 요청
         Integer num = conversationRepository.countByUserAndTitle(user, title);
         ChatModelRequestDto requestDto = new ChatModelRequestDto();
