@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,7 +67,7 @@ public class MessageService {
         // 챗봇 모델 요청
         Integer num = conversationRepository.countByUserAndTitle(user, title);
 
-        List<String> messages = null;
+        List<String> messages = new ArrayList<>();
 
         if (num != 0) {
             ConversationEntity conv = conversationRepository.findTopByUserAndTitleOrderByConversationIdDesc(user, title);
