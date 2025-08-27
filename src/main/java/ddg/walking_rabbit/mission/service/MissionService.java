@@ -4,6 +4,7 @@ import ddg.walking_rabbit.global.domain.entity.*;
 import ddg.walking_rabbit.global.domain.repository.MissionRepository;
 import ddg.walking_rabbit.global.domain.repository.ParkRepository;
 import ddg.walking_rabbit.global.domain.repository.UserRepository;
+import ddg.walking_rabbit.mission.dto.CreateMissionDto;
 import ddg.walking_rabbit.mission.dto.MissionDto;
 import ddg.walking_rabbit.mission.dto.MissionResponseDto;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,15 +33,21 @@ public class MissionService {
 
         boolean isNormal = Math.random() < 0.8;
 
-        String content = webClient.post()
+        CreateMissionDto response = webClient.post()
                 .uri("/api/mission")
                 .retrieve()
                 .onStatus(
                         HttpStatusCode::is5xxServerError,
                         resp -> resp.createException().flatMap(Mono::error)
                 )
-                .bodyToMono(String.class)
+                .bodyToMono(CreateMissionDto.class)
                 .block();
+
+        if (response == null) {
+            throw new RuntimeException("미션 생성에 실패했습니다.");
+        }
+
+        String content = response.getAnswer();
 
         // 랜덤한 공원 랜덤 돌리기
         // 전체 공원 디비에 저장 -> 랜덤돌려서 ~에서 만들기
