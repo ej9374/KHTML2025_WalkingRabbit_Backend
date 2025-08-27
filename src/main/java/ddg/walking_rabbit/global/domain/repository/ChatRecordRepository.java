@@ -5,6 +5,7 @@ import ddg.walking_rabbit.global.domain.entity.ConversationEntity;
 import ddg.walking_rabbit.global.domain.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -29,4 +30,12 @@ public interface ChatRecordRepository extends JpaRepository<ChatRecordEntity, Lo
 
     @Query("select c from ChatRecordEntity c where c.user = :user and c.createdAt >= :start and c.createdAt < :end order by c.chatRecordId asc")
     List<ChatRecordEntity> findAllByUserAndBetweenDateOrderByChatRecordIdAsc(UserEntity user, LocalDateTime start, LocalDateTime end);
+
+    Integer countByUser(UserEntity user);
+
+    @Query("select count(distinct c.title) from ChatRecordEntity c where c.user = :user")
+    Integer countByDistinctTitleByUser(UserEntity user);
+
+    @Query(value = "select count(distinct date(c.created_at)) from chat_record_entity c where c.user_user_id = :userId", nativeQuery = true)
+    Long countByDistinctDateByUser(@Param("userId")Long userId);
 }
