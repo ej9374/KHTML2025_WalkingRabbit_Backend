@@ -1,10 +1,8 @@
 package ddg.walking_rabbit.mission.service;
 
-import ddg.walking_rabbit.global.domain.entity.MissionEntity;
-import ddg.walking_rabbit.global.domain.entity.MissionStatus;
-import ddg.walking_rabbit.global.domain.entity.MissionType;
-import ddg.walking_rabbit.global.domain.entity.UserEntity;
+import ddg.walking_rabbit.global.domain.entity.*;
 import ddg.walking_rabbit.global.domain.repository.MissionRepository;
+import ddg.walking_rabbit.global.domain.repository.ParkRepository;
 import ddg.walking_rabbit.global.domain.repository.UserRepository;
 import ddg.walking_rabbit.mission.dto.MissionDto;
 import ddg.walking_rabbit.mission.dto.MissionResponseDto;
@@ -16,6 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +24,13 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final UserRepository userRepository;
     private final WebClient webClient;
+    private final ParkRepository parkRepository;
 
     public MissionDto createMission(Long userId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("유저가 존재하지 않습니다."));
 
         boolean isNormal = Math.random() < 0.8;
-
-
 
         String content = webClient.post()
                 .uri("/api/mission")
@@ -46,7 +45,9 @@ public class MissionService {
         // 랜덤한 공원 랜덤 돌리기
         // 전체 공원 디비에 저장 -> 랜덤돌려서 ~에서 만들기
         if (!isNormal) {
-            String park = ""+ "에서 ";
+            List<ParkEntity> all = parkRepository.findAll();
+            ParkEntity randomOne = all.get(new Random().nextInt(all.size()));
+            String park = randomOne.getParkNm() + "에서 ";
             content = park + content;
         }
 
