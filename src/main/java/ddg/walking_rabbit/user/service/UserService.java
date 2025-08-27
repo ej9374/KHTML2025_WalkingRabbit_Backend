@@ -1,7 +1,10 @@
 package ddg.walking_rabbit.user.service;
 
 import com.google.cloud.storage.*;
+import ddg.walking_rabbit.global.domain.entity.MissionStatus;
 import ddg.walking_rabbit.global.domain.entity.UserEntity;
+import ddg.walking_rabbit.global.domain.repository.ChatRecordRepository;
+import ddg.walking_rabbit.global.domain.repository.MissionRepository;
 import ddg.walking_rabbit.global.domain.repository.UserRepository;
 import ddg.walking_rabbit.user.dto.UserInfoDto;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final Storage storage;
+    private final ChatRecordRepository chatRecordRepository;
+    private final MissionRepository missionRepository;
 
     @Value("${gcp.storage.bucket.name}")
     private String bucketName;
@@ -48,6 +53,17 @@ public class UserService {
         UserInfoDto result = new UserInfoDto();
         result.setNickname(user.getNickname());
         result.setProfileImageUrl(user.getProfileImageUrl());
+
+        Integer totalDate = chatRecordRepository.countByDistinctDateByUser(user.getKakaoId()).intValue();
+        Integer totalTitle = chatRecordRepository.countByDistinctTitleByUser(user);
+        Integer totalChatRecords = chatRecordRepository.countByUser(user);
+        Integer totalMissionSuccess = missionRepository.countByUserAndIsSuccess(user, MissionStatus.SUCCESS);
+
+        result.setTotalDate(totalDate);
+        result.setTotalTitle(totalTitle);
+        result.setTotalChatRecords(totalChatRecords);
+        result.setTotalMissionSuccess(totalMissionSuccess);
+
         return result;
     }
 

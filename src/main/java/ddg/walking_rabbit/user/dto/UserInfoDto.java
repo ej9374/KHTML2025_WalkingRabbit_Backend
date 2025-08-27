@@ -8,4 +8,8 @@ import lombok.Setter;
 public class UserInfoDto {
     private String nickname;
     private String profileImageUrl;
+    private Integer totalDate;
+    private Integer totalTitle;
+    private Integer totalChatRecords;
+    private Integer totalMissionSuccess;
 }
