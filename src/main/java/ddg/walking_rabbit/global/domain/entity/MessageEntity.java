@@ -25,6 +25,8 @@ public class MessageEntity {
     @Enumerated(EnumType.STRING)
     private ContentType contentType;
 
+    @Lob
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String content;
 
 }
