@@ -13,4 +13,6 @@ public class ParkDto {
 
     @JsonProperty("lot")
     private Double lon;
+
+    private Double area;
 }

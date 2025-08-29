@@ -37,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
                     .parkNm(p.getParkNm())
                     .lat(p.getLat())
                     .lon(p.getLon())
+                    .area(p.getArea())
                     .build();
             parkRepository.save(park);
         }
