@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -52,7 +53,7 @@ public class ChatRecordService {
     }
 
     public MessageResponseDto getChatRecord(UserEntity user, Long chatRecordId) {
-        if (user != chatRecordRepository.findUserByChatRecordId(chatRecordId)){
+        if (!Objects.equals(user.getUserId(), chatRecordRepository.findUser_UserIdByChatRecordId(chatRecordId))){
             throw new IllegalArgumentException("해당 채팅을 조회할 권한이 없습니다.");
         }
 
@@ -60,7 +61,12 @@ public class ChatRecordService {
         List<MessageEntity> messages = messageRepository.findAllByConversationOrderByMessageIdAsc(conversation);
 
         MessageResponseDto results = new MessageResponseDto();
-        results.setMission(conversation.getMission().getContent());
+        results.setMessages(new ArrayList<>());
+        String content = null;
+        if (conversation.getMission() != null) {
+            content = conversation.getMission().getContent();
+        }
+        results.setMission(content);
         for (MessageEntity message : messages) {
             MessageDto result = new MessageDto();
             result.setMessageId(message.getMessageId());
@@ -82,7 +88,11 @@ public class ChatRecordService {
             result.setChatRecordId(chatRecord.getChatRecordId());
             result.setLatitude(conversation.getLatitude());
             result.setLongitude(conversation.getLongitude());
-            result.setMissionId(conversation.getMission().getMissionId());
+            Long missionId = null;
+            if (chatRecord.getConversation().getMission() != null) {
+                missionId = chatRecord.getConversation().getMission().getMissionId();
+            }
+            result.setMissionId(missionId);
             results.add(result);
         }
         return results;

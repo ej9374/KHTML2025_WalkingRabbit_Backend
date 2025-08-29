@@ -20,8 +20,8 @@ public interface ChatRecordRepository extends JpaRepository<ChatRecordEntity, Lo
 
     List<ChatRecordEntity> findAllByTitleOrderByChatRecordId(String title);
 
-    @Query("select c.user from ChatRecordEntity c where c.chatRecordId = :chatRecordId")
-    UserEntity findUserByChatRecordId(Long chatRecordId);
+    @Query("select c.user.userId from ChatRecordEntity c where c.chatRecordId = :chatRecordId")
+    Long findUser_UserIdByChatRecordId(Long chatRecordId);
 
     @Query("select c.conversation from ChatRecordEntity c where c.chatRecordId = :chatRecordId")
     ConversationEntity findConversationByChatRecordId(Long chatRecordId);
