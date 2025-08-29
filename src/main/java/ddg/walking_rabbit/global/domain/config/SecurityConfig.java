@@ -32,17 +32,18 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/favicon.ico",
-                                "/error",
-                                "/api/auth/**",
-                                "/api/users/exist",
-                                "/api/users/signup"
-                        ).permitAll()
-                        .anyRequest().authenticated() // 또는 authenticated()
+                        .anyRequest().permitAll()
+//                        .requestMatchers(
+//                                "/v3/api-docs/**",
+//                                "/swagger-ui/**",
+//                                "/swagger-ui.html",
+//                                "/favicon.ico",
+//                                "/error",
+//                                "/api/auth/**",
+//                                "/api/users/exist",
+//                                "/api/users/signup"
+//                        ).permitAll()
+//                        .anyRequest().authenticated() // 또는 authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,7 +59,9 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "http://localhost:3000",
                 "http://127.0.0.1:3000",
-                "http://127.0.0.1:8000"
+                "http://127.0.0.1:8000",
+                "http://localhost:8081",
+                "http://127.0.0.1:8081"
         ));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         cfg.setAllowedHeaders(List.of("*"));
