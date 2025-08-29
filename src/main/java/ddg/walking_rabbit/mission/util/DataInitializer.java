@@ -25,6 +25,9 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        if (parkRepository.count() > 0) {
+            return;
+        }
         InputStream in = new ClassPathResource("parks.json").getInputStream();
         List<ParkDto> parks = objectMapper.readValue(
                 in,
