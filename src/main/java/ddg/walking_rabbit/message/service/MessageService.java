@@ -3,6 +3,7 @@ package ddg.walking_rabbit.message.service;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.cloud.storage.*;
 import ddg.walking_rabbit.global.domain.entity.*;
+import ddg.walking_rabbit.global.domain.repository.ParkRepository;
 import ddg.walking_rabbit.message.dto.*;
 import ddg.walking_rabbit.global.domain.repository.ConversationRepository;
 import ddg.walking_rabbit.global.domain.repository.MessageRepository;
@@ -37,6 +38,7 @@ public class MessageService {
     private final ConversationRepository conversationRepository;
     private final Storage storage;
     private final WebClient webClient;
+    private final ParkRepository parkRepository;
 
     @Value("${gcp.storage.bucket.name}")
     private String bucketName;
@@ -64,6 +66,7 @@ public class MessageService {
             throw new EntityNotFoundException("해당 사진은 꽃이 아닙니다.");
         }
 
+        log.info("꽃의 이름은: "+ title);
         // 챗봇 모델 요청
         Integer num = conversationRepository.countByUserAndTitle(user, title);
 
@@ -83,9 +86,9 @@ public class MessageService {
 
         ChatModelResponseDto responseDto = sendInfoToModel(requestDto);
 
-        if (responseDto == null) {
-            throw new RuntimeException("응답이 옳지 않습니다.");
-        }
+        log.info("모델로부터 받은 값: ");
+        log.info("content: " + responseDto.getAnswer());
+
 
          // 미션인경우
         if (responseDto.getIsSuccess() != null) {
@@ -94,6 +97,8 @@ public class MessageService {
             }
             if (conversation.getMission().getMissionType() == MissionType.LOCAL) {
                 String[] parts = conversation.getMission().getContent().split("에서");
+                String part = parts[0];
+                ParkEntity park = parkRepository.findByParkNm(part);
                 // 공원 및 거리 저장된 엔티티 SpotEntityRepository라고 합세
                 // 근데 그 안의 범위가 아니면 머시기저시기 postGresSQL 폴리곤 써야할듯 난중에 하자
                 boolean success = false;
@@ -225,7 +230,8 @@ public class MessageService {
     }
 
     public ChatModelResponseDto sendInfoToModel(ChatModelRequestDto requestDto) {
-        return webClient.post()
+
+        ChatModelResponseDto responseDto = webClient.post()
                 .uri("/api/photo")
                 .bodyValue(requestDto)
                 .retrieve()
@@ -235,6 +241,12 @@ public class MessageService {
                 )
                 .bodyToMono(ChatModelResponseDto.class)
                 .block();
+
+        if (responseDto == null) {
+            throw new RuntimeException("응답이 옳지 않습니다.");
+        }
+
+        return responseDto;
     }
 
 }
