@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class RankDto {
     private Integer rank;
+    private Long userId;
     private String nickname;
     private Integer chatRecordNumber;
 }
