@@ -9,6 +9,7 @@ import ddg.walking_rabbit.global.domain.repository.ConversationRepository;
 import ddg.walking_rabbit.global.domain.repository.MessageRepository;
 import ddg.walking_rabbit.global.domain.repository.MissionRepository;
 import ddg.walking_rabbit.global.domain.entity.UserEntity;
+import ddg.walking_rabbit.message.util.GeoUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class MessageService {
     private final Storage storage;
     private final WebClient webClient;
     private final ParkRepository parkRepository;
+    private final GeoUtil geoUtil;
 
     @Value("${gcp.storage.bucket.name}")
     private String bucketName;
@@ -89,7 +91,7 @@ public class MessageService {
         log.info("모델로부터 받은 값: ");
         log.info("content: " + responseDto.getAnswer());
 
-
+        log.info("isSuccess: " + responseDto.getIsSuccess());
          // 미션인경우
         if (responseDto.getIsSuccess() != null) {
             if (!responseDto.getIsSuccess()) {
@@ -99,9 +101,9 @@ public class MessageService {
                 String[] parts = conversation.getMission().getContent().split("에서");
                 String part = parts[0];
                 ParkEntity park = parkRepository.findByParkNm(part);
-                // 공원 및 거리 저장된 엔티티 SpotEntityRepository라고 합세
-                // 근데 그 안의 범위가 아니면 머시기저시기 postGresSQL 폴리곤 써야할듯 난중에 하자
-                boolean success = false;
+
+                boolean success = geoUtil.confirmMissionComplete(chatStartDto.getLatitude(), chatStartDto.getLongitude(), park);
+
                 if (!success) {
                     throw new IllegalArgumentException("미션을 실패하셨습니다");
                 }
@@ -248,5 +250,4 @@ public class MessageService {
 
         return responseDto;
     }
-
 }
