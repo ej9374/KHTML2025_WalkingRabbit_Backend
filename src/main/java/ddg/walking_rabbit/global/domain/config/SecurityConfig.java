@@ -32,18 +32,17 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-//                        .requestMatchers(
-//                                "/v3/api-docs/**",
-//                                "/swagger-ui/**",
-//                                "/swagger-ui.html",
-//                                "/favicon.ico",
-//                                "/error",
-//                                "/api/auth/**",
-//                                "/api/users/exist",
-//                                "/api/users/signup"
-//                        ).permitAll()
-//                        .anyRequest().authenticated() // 또는 authenticated()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/favicon.ico",
+                                "/error",
+                                "/api/auth/**",
+                                "/api/users/exist",
+                                "/api/users/signup"
+                        ).permitAll()
+                        .anyRequest().authenticated() // 또는 authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
