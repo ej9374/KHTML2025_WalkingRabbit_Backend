@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,38 +30,39 @@ public class CalendarService {
         LocalDateTime start = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime end = start.plusMonths(1);
 
-        List<ChatRecordEntity> all = chatRecordRepository.findAllByUserAndBetweenDateOrderByChatRecordIdAsc(user, start, end);
-
-        ZoneId zone = ZoneId.of("Asia/Seoul");
+        List<ChatRecordEntity> all = chatRecordRepository
+                .findAllByUserAndBetweenDateOrderByChatRecordIdAsc(user, start, end);
 
         // key가 Integer인  day, value가 그날의 ChatRecordEntity 리스트
-        Map<Integer, List<ChatRecordEntity>> byDay = all
-                .stream()
+        Map<Integer, List<ChatRecordEntity>> byDay = all.stream()
                 .collect(Collectors.groupingBy(
                         rec -> rec.getCreatedAt()
-                                .atZone(ZoneOffset.UTC)
-                                .withZoneSameInstant(zone)
                                 .toLocalDate()
-                                .getDayOfMonth() //day를 키로
-                ));
+                                .getDayOfMonth()));
         // { 9 : [rec1, rec2], 10 : [rec3, rec4] } 구조
 
         List<CalendarResponseDto> result = byDay.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
                 .map(e -> {
                     int day = e.getKey();
                     List<ChatRecordEntity> records = e.getValue();
 
                     List<ChatRecordDto> chatRecords = records.stream()
+                            .sorted(Comparator.comparingLong(ChatRecordEntity::getChatRecordId).reversed())
                             .map(r -> {
-                                ChatRecordDto chatRecordDto = new ChatRecordDto();
-                                chatRecordDto.setChatRecordId(r.getChatRecordId());
-                                chatRecordDto.setPhoto(r.getCoverPhoto());
-                                chatRecordDto.setTitle(r.getTitle());
-                                chatRecordDto.setMissionId(r.getConversation().getMission().getMissionId());
-                                return chatRecordDto;
+                                ChatRecordDto dto = new ChatRecordDto();
+                                dto.setChatRecordId(r.getChatRecordId());
+                                dto.setPhoto(r.getCoverPhoto());
+                                dto.setTitle(r.getTitle());
+
+                                Long missionId = null;
+                                if (r.getConversation() != null && r.getConversation().getMission() != null) {
+                                    missionId = r.getConversation().getMission().getMissionId();
+                                }
+                                dto.setMissionId(missionId);
+                                return dto;
                             })
-                            .toList();
-                    Collections.reverse(chatRecords);
+                            .collect(Collectors.toCollection(ArrayList::new));
 
                     CalendarResponseDto dayDto = new CalendarResponseDto();
                     dayDto.setDay(day);
