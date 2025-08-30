@@ -1,5 +1,7 @@
 package ddg.walking_rabbit.message.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ddg.walking_rabbit.global.response.SuccessResponse;
 import ddg.walking_rabbit.message.dto.ChatRequestDto;
 import ddg.walking_rabbit.message.dto.ChatResponseDto;
@@ -20,6 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
@@ -31,8 +35,11 @@ public class MessageController {
     @PostMapping(value ="/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SuccessResponse<ChatResponseDto>> startChat(
             @RequestPart(value = "file", required = false) MultipartFile file,
-            @RequestPart(value = "meta", required = false) ChatStartDto chatStartDto
-    ) {
+            @RequestPart(value = "meta", required = false) String metaRaw
+    ) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        ChatStartDto chatStartDto = mapper.readValue(metaRaw, ChatStartDto.class);
+
         log.info(String.valueOf(file));
         log.info(chatStartDto.toString());
         UserEntity user = ((UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
