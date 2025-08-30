@@ -28,7 +28,7 @@ public class MessageController {
 
     @PostMapping(value ="/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SuccessResponse<ChatResponseDto>> startChat(
-            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @RequestPart("meta") ChatStartDto chatStartDto
     ) {
         UserEntity user = ((UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());

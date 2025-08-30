@@ -56,11 +56,16 @@ public class MessageService {
         conversation.setMission(mission);
         conversationRepository.save(conversation);
 
+        if (file != null){
+            file = null;
+        }
+
         MessageEntity userMessage = uploadImage(file, conversation);
 
-        // 사진인식 모델 요청
-        String title = sendPhotoToModel(userMessage.getContent());
 
+        // 사진인식 모델 요청
+//        String title = sendPhotoToModel(userMessage.getContent());
+        String title ="";
         if (title == null) {
             throw new RuntimeException("응답이 옳지 않습니다.");
         }
@@ -187,27 +192,8 @@ public class MessageService {
 
     @Transactional
     public MessageEntity uploadImage(MultipartFile file, ConversationEntity conversation) {
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("빈 파일입니다.");
-        }
 
-        String newFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        BlobId blobId = BlobId.of(bucketName, newFilename);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
-                .setContentType(file.getContentType())
-                .build();
-
-        try {
-            Blob blob = storage.create(blobInfo, file.getBytes());
-            if (blob == null || blob.getSize() == 0) {
-                throw new IllegalArgumentException("GCS 업로드 중 오류가 발생했습니다.");
-            }
-        } catch(IOException | StorageException e){
-            throw new IllegalArgumentException("GCS 업로드 중 오류가 발생했습니다.");
-        }
-
-        String publicUrl = String.format("https://storage.googleapis.com/%s/%s",
-                bucketName, URLEncoder.encode(newFilename, StandardCharsets.UTF_8));
+        String publicUrl = messageRepository.findContentByMessageId(1L);
 
         MessageEntity message = new MessageEntity();
         message.setRole(Role.USER);
