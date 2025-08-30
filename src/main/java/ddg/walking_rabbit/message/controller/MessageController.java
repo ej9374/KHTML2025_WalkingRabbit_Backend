@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +23,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
+@Slf4j
 public class MessageController {
 
     private final MessageService messageService;
 
     @PostMapping(value ="/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SuccessResponse<ChatResponseDto>> startChat(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("meta") ChatStartDto chatStartDto
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart(value = "meta", required = false) ChatStartDto chatStartDto
     ) {
+        log.info(String.valueOf(file));
+        log.info(chatStartDto.toString());
         UserEntity user = ((UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         ChatResponseDto responseDto = messageService.startChat(user, file, chatStartDto);
         return SuccessResponse.onSuccess("사진에 대한 챗봇 응답이 생성되었습니다.", HttpStatus.CREATED, responseDto);
