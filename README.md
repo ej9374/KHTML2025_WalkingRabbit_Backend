@@ -1,3 +1,7 @@
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/e45c9fb7-bfe6-4d7e-bc92-78aff9bf0cc9" />
+
+<br>
+
 # 🚶 워킹토끼
 AI와 지도 기반 미션으로 동대문을 걸으며 나만의 식물 도감을 만들어가는 참여형 보행 플랫폼
 
