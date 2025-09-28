@@ -65,8 +65,8 @@ AI와 지도 기반 미션으로 동대문을 걸으며 나만의 식물 도감�
 
 ```css
 [Frontend]  ──>  [Spring Boot Backend]  ──> [Fast API]
-                  ├─ MySQL (유저·기록·랭킹)       └─ AI (오늘의 미션 생성 모델 + 식물 인식 모델)
-                  ├─ GCP Storage (이미지 파일)
+                  ├─ MySQL (유저·기록·랭킹)       └─ AI (오늘의 미션 생성 모델
+                  ├─ GCP Storage (이미지 파일)          + 식물 인식 모델)
                   └─ AWS EC2 / RDS (배포 및 운영)
 ```
 <br>
