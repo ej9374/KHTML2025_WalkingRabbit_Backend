@@ -63,12 +63,8 @@ AI와 지도 기반 미션으로 동대문을 걸으며 나만의 식물 도감�
 
 ## 아키텍처
 
-```css
-[Frontend]  ──>  [Spring Boot Backend]  ──> [Fast API]
-                  ├─ MySQL (유저·기록·랭킹)       └─ AI (오늘의 미션 생성 모델
-                  ├─ GCP Storage (이미지 파일)          + 식물 인식 모델)
-                  └─ AWS EC2 / RDS (배포 및 운영)
-```
+<img width="538" height="352" alt="Image" src="https://github.com/user-attachments/assets/8ae97d4b-4e69-43e6-b9cf-6af008ef4a78" />
+
 <br>
 
  ## 주요 설계
@@ -88,3 +84,26 @@ AI와 지도 기반 미션으로 동대문을 걸으며 나만의 식물 도감�
 <br>
 
 ## 발표 자료
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/e45c9fb7-bfe6-4d7e-bc92-78aff9bf0cc9" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/4023e815-1861-44f6-8ac2-02a7c1a73504" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/81774505-8efe-4089-8cca-5c3c87357f04" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/ce25ab25-2414-47af-b663-5ba857a43f58" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/096dbc62-d7e2-4178-8434-5f06390d3098" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/55c8ac88-29cf-4c7b-b225-6d60cda337e1" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/27884ffc-2244-47ff-82a4-44870a0f284f" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/a1e126cd-6569-4727-9ca0-dcc2dc523a0b" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/30f67907-cc75-4a88-a172-f5b3d13a43d1" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/ef18117c-c305-48e6-bbb6-046a267fb55c" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/030a517c-944b-46d7-ace1-37123fc82cd9" />
+
+<img width="1479" height="831" alt="Image" src="https://github.com/user-attachments/assets/c35de9f9-d94a-4a8d-b01d-3596029206e8" />
